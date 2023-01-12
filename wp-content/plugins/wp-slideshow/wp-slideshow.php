@@ -6,21 +6,20 @@ Author: Shkurte Azemi
 Version: 1.0.0
 */
 
+use JetBrains\PhpStorm\NoReturn;
+
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
+
 class SlideshowSettings
 {
-
-
 
     function __construct()
     {
         //registered hooks and filters that are needed for the plugin
         add_action('admin_menu', array($this, 'adminPage'));
         add_action('admin_init', array($this, 'settings'));;
-        add_action('wp_enqueue_scripts', array($this, 'pluginAssets'));
-        add_filter('the_content', array($this, 'showEventsTable'));
-        add_action('phpmailer_init', array($this, 'setupSMTP'));
-        remove_filter('the_content', 'wpautop');
+        add_action('admin_enqueue_scripts', array($this, 'pluginAssets'));
+
     }
 
 
@@ -28,28 +27,58 @@ class SlideshowSettings
     function settings()
     {
         //added page section
-        add_settings_section('event_data_fields', 'Event Data Fields', null, 'events-settings-page');
+        add_settings_section('slideshow_images_section', 'Slideshow Images', null, 'slideshow-settings-page');
 
-        //registered email receiver option
-        add_settings_field('events_email_receiver', 'The recipient email', array($this, 'emailInput'), 'events-settings-page', 'event_data_fields');
-        register_setting('eventsplugin', 'events_email_receiver', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+        //registered slideshow images option
+        add_settings_field('slideshow_images_ids', 'Images', array($this, 'slideshowImagesInput'), 'slideshow-settings-page', 'slideshow_images_section');
+        register_setting('slideshowimages', 'slideshow_images_ids', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
     }
 
-    //show the input field receiver email
-    function emailInput()
+    //show the input field for media upload
+    function slideshowImagesInput()
     {
         ?>
-        <input type="email" name="events_email_receiver"
-               value="<?php echo esc_attr(get_option('events_email_receiver')) ?>"
-               style="width:600px">
+        <input type="hidden" name="slideshow_images_ids"
+               value="<?php echo esc_attr(get_option('slideshow_images_ids')) ?>"
+               style="width:600px" id="images">
+        <button type="button" class="button button-primary upload_image_button"><?php _e('Select Images'); ?></button>
+
         <?php
+        $image_ids_string = get_option('slideshow_images_ids');
+        $image_ids = explode(",", $image_ids_string);
+
+        $images = [];
+        foreach ($image_ids as $image_id) {
+            $image = wp_get_attachment_image_src($image_id, 'medium');
+            $images[$image_id] = $image[0];
+        }
+
+
+        if (!empty($images)):
+            ?>
+            <div class="slideshow-block grid-gallery">
+                <div class="container slideshow-container">
+
+                    <div id="sortable" class="row">
+                        <?php foreach ($images as $id=>$url): ?>
+                            <div class="ui-state-default col-md-6 col-lg-4 item" data-id="<?php echo $id?>"><img
+                                        class="img-fluid image scale-on-hover"
+                                        src="<?php echo $url?>">
+                                <a class="remove-image" href="#" >&#215;</a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        <?php
+        endif;
     }
 
     //register admin page in the dashboard menu
     function adminPage()
     {
-        add_options_page('Event Settings', 'Events Settings', 'manage_options', 'events-settings-page', array($this, 'ourHtml'));
+        add_options_page('Slideshow Settings', 'Slideshow Settings', 'manage_options', 'slideshow-settings-page', array($this, 'ourHtml'));
     }
 
     //render settings fields HTML
@@ -62,15 +91,16 @@ class SlideshowSettings
 
         ?>
         <div class="wrap">
-            <h1> <?php _e('Plugin Settings', 'events-importer') ?></h1>
+            <h1> <?php _e('Plugin Settings', 'slideshow-images') ?></h1>
             <div class="tab-content">
                 <form method="post" action="options.php" enctype="multipart/form-data">
                     <?php
-                    settings_fields('eventsplugin');
-                    do_settings_sections('events-settings-page');
+                    settings_fields('slideshowimages');
+                    do_settings_sections('slideshow-settings-page');
                     submit_button();
                     ?>
                 </form>
+
             </div>
         </div>
         <?php
@@ -79,17 +109,16 @@ class SlideshowSettings
     //enqueue js scripts and styles
     function pluginAssets()
     {
-        wp_enqueue_style('bootstrap-style', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css');
-        wp_enqueue_style('bootstrap-datatable-style', '//cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css');
-        wp_enqueue_style('bootstrap-datatable-styles', '//cdn.datatables.net/v/bs4/jq-3.6.0/dt-1.13.1/r-2.4.0/sb-1.4.0/datatables.min.css');
         wp_enqueue_style('main-css', plugin_dir_url(__FILE__) . 'assets/css/main.css');
+        wp_enqueue_style('bootstrap-style', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css');
+//        wp_enqueue_script( 'test-script', plugins_url( '/assets/js/test.js' ,__FILE__),null, false, true );
+//        wp_enqueue_script('jquery-csn', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js', null, false, true);
+        wp_enqueue_media();
+        wp_enqueue_script('medialib', plugins_url('/assets/js/medialib-script.js', __FILE__), null, false, true);
 
-        wp_enqueue_script('jquery-csn', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js', null, false, true);
-        wp_enqueue_script('bootstrap-script', plugins_url('assets/js/datatable-init.js', __FILE__), null, false, true);
-        wp_enqueue_script('bootstrap-scripts', '//cdn.datatables.net/v/bs4/jq-3.6.0/dt-1.13.1/r-2.4.0/sb-1.4.0/datatables.min.js', null, false, true);
 
     }
 
 }
 
-$events = new SlideshowSettings();
+$slideshow = new SlideshowSettings();

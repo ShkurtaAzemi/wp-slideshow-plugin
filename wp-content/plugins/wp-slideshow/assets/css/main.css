@@ -1,0 +1,102 @@
+#sortable {
+    /*list-style-type: none;*/
+    /*margin: 0;*/
+    /*padding: 0;*/
+    /*width: 450px;*/
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#sortable li {
+    margin: 3px 3px 3px 0;
+    padding: 1px;
+    float: left;
+    width: 100px;
+    height: 90px;
+    font-size: 4em;
+    text-align: center;
+}
+
+.slideshow-block.grid-gallery{
+    padding-bottom: 60px;
+    padding-top: 60px;
+}
+
+.slideshow-block.grid-gallery .heading{
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.slideshow-block.grid-gallery .heading h2{
+    font-weight: bold;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+}
+
+.slideshow-block.grid-gallery a:hover{
+    opacity: 0.8;
+}
+
+.slideshow-block .slideshow-container{
+    display: inline-block;
+}
+
+.slideshow-block.grid-gallery .item img{
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+    transition: 0.4s;
+    width: 550px;
+    height: 250px;
+}
+
+.slideshow-block.grid-gallery .item{
+    margin-bottom: 20px;
+}
+
+@media (min-width: 576px) {
+
+    .slideshow-block.grid-gallery .scale-on-hover:hover{
+        transform: scale(1.05);
+        box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.15) !important;
+    }
+}
+
+.remove-image{
+    display: none;
+}
+.item:hover .remove-image {
+/*    display: block;*/
+/*    color: red;*/
+/*}*/
+/*!*remove image button*!*/
+/*.remove-image {*/
+    display: inline;
+    position: absolute;
+    top: -14px;
+    right: 3px;
+    border-radius: 10em;
+    padding: 2px 6px 3px;
+    text-decoration: none;
+    font: 700 21px/20px sans-serif;
+    background: #555;
+    border: 3px solid #fff;
+    color: #FFF;
+    /*box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);*/
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    -webkit-transition: background 0.5s;
+    transition: background 0.5s;
+
+}
+.remove-image:hover {
+    color: white;
+    background: #2271b1;
+    text-decoration: none;
+    /*padding: 3px 7px 5px;*/
+    top: -13px;
+    -webkit-transform:translate3d(0,0,0);
+    /*right: -3px;*/
+}
+.remove-image:active {
+    /*background: #2271b1;*/
+    top: -12px;
+    /*right: -11px;*/
+}
