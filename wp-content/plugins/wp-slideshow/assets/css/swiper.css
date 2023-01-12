@@ -1,0 +1,34 @@
+.swiper-container img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.swiper-container {
+    width: 100%;
+    overflow-x: hidden;
+}
+.swiper-container.slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.swiper-container.slider .swiper-slide{
+    height: auto;
+}
+.swiper-container.slider-thumbnail {
+    /*height: 20vh;*/
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-container.slider-thumbnail .swiper-wrapper .swiper-slide {
+    width: 25%;
+    height: auto;
+    opacity: 0.5;
+    overflow: hidden;
+}
+.swiper-container.slider-thumbnail .swiper-wrapper .swiper-slide.swiper-slide-thumb-active {
+    opacity: 1;
+}
