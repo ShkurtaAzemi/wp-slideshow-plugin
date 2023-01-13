@@ -58,7 +58,10 @@ class SlideshowSettings
         if (!empty($image_ids)) {
             foreach ($image_ids as $image_id) {
                 $image = wp_get_attachment_image_src($image_id, 'medium');
-                $images[$image_id] = $image[0];
+                $images[] =array(
+                    'id' => $image_id,
+                    'url' => $image[0]
+                ) ;
             }
         }
 
@@ -68,14 +71,14 @@ class SlideshowSettings
                 <div class="container slideshow-container">
 
                     <div id="sortable" class="row">
-                        <?php foreach ($images as $id => $url):
-                            if ($id != null):?>
-                                <div class="ui-state-default col-md-6 col-lg-4 item" data-id="<?php echo $id ?>"><img
+                        <?php foreach ($images as $image):
+                     ?>
+                                <div class="ui-state-default col-md-6 col-lg-4 item" data-id="<?php echo $image['id']?>"><img
                                             class="img-fluid image scale-on-hover"
-                                            src="<?php echo $url ?>">
+                                            src="<?php echo $image['url'] ?>">
                                     <span class="remove-image" href="#">&#215;</span>
                                 </div>
-                            <?php endif;endforeach; ?>
+                            <?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -133,42 +136,30 @@ class SlideshowSettings
         if (!empty($image_ids)) {
             foreach ($image_ids as $image_id) {
                 $image = wp_get_attachment_image_src($image_id, 'medium');
-                $images[$image_id] = $image[0];
+                $images[] =array(
+                    'id' => $image_id,
+                    'url' => $image[0]
+                ) ;
             }
         }
 
-//        $output = '<div class="slideshow-block grid-gallery">
-//                <div class="container slideshow-container">
-//
-//                    <div id="sortable" class="row">';
-//
-//        foreach ($images as $id => $url):
-//            $output .= " <div class='ui-state-default col-md-6 col-lg-4 item' data-id='${id}'><img
-//                                        class'img-fluid image scale-on-hover'
-//                                        src='${url}'>
-//                                <span class='remove-image' href='#'>&#215;</span>
-//                            </div>";
-//        endforeach;
-//        $output .= '</div>
-//                </div>
-//            </div>';
         $output = '';
         if (!empty($images)) {
             $output .= '<div class="swiper-container slider">
                     <div class="swiper-wrapper">
     <!-- Slides -->';
-            foreach ($images as $id => $url):
-                if ($id != null) {
-                    $output .= "<div class='swiper-slide'><img src='${url}' alt=''></div>";
-                }
+            foreach ($images as  $image):
+
+                $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
+
             endforeach;
             $output .= '</div><div class="swiper-button-next"></div><div class="swiper-button-prev"></div></div>';
 
             $output .= '<div class="swiper-container slider-thumbnail"><div class="swiper-wrapper">';
-            foreach ($images as $id => $url):
-                if ($id != null) {
-                    $output .= "<div class='swiper-slide'><img src='${url}' alt=''></div>";
-                }
+            foreach ($images as  $image):
+
+                    $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
+
             endforeach;
             $output .= '</div></div>';
         }
@@ -180,8 +171,6 @@ class SlideshowSettings
     {
         wp_enqueue_style('main-css', plugin_dir_url(__FILE__) . 'assets/css/main.css');
         wp_enqueue_style('bootstrap-style', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css');
-//        wp_enqueue_script( 'test-script', plugins_url( '/assets/js/test.js' ,__FILE__),null, false, true );
-//        wp_enqueue_script('jquery-csn', '//cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js', null, false, true);
         wp_enqueue_media();
         wp_enqueue_script('medialib', plugins_url('/assets/js/medialib-script.js', __FILE__), null, false, true);
 
