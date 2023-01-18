@@ -13,20 +13,27 @@ Version: 1.0.0
 
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
-class SlideshowSettings
+//set default values for settings options upon plugin activation
+function plugin_activate()
 {
 
+    if (!get_option('slideshow_images_ids')) {
+        add_option('slideshow_images_ids', '');
+    }
 
-    public $submenu;
+}
+
+register_activation_hook(__FILE__, 'plugin_activate');
+
+class SlideshowSettings
+{
 
     function __construct()
     {
         $this->setup();
-
-//        print_r($this->submenu);
-
     }
 
+    //setup function for plugin action hooks
     public function setup()
     {
 
@@ -66,8 +73,6 @@ class SlideshowSettings
 
         <?php
         $images = $this->getSlideshowImages();
-
-
             ?>
             <div class="slideshow-block grid-gallery">
                 <div class="container slideshow-container">
@@ -103,7 +108,6 @@ class SlideshowSettings
         }
 
         ?>
-
         <div class="wrap">
             <h1> <?php _e('Plugin Settings', 'slideshow-images') ?></h1>
             <div class="tab-content">
@@ -120,7 +124,7 @@ class SlideshowSettings
         <?php
     }
 
-
+    //shortcode callback output
     function myslideshow_callback()
     {
         $images = $this->getSlideshowImages();
@@ -147,6 +151,8 @@ class SlideshowSettings
         return $output;
     }
 
+    //a function to get an array of selected images
+
     function getSlideshowImages()
     {
         $image_ids_string = get_option('slideshow_images_ids');
@@ -169,7 +175,8 @@ class SlideshowSettings
         return $images;
     }
 
-    //enqueue js scripts and styles
+    //enqueue admin styles and scripts
+
     function adminAssets()
     {
         wp_enqueue_style('main-css', plugin_dir_url(__FILE__) . 'assets/css/main.css');
@@ -180,6 +187,7 @@ class SlideshowSettings
 
     }
 
+    //enqueue frontend styles and scripts
     function frontendAssets()
     {
         wp_enqueue_style('swiper-css', plugin_dir_url(__FILE__) . 'lib/swiper-bundle.min.css');
