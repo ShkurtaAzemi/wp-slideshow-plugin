@@ -15,6 +15,11 @@
 
             return existingImageIds;
         }
+        let check_exisiting_length  = refreshExistingIds();
+        if(check_exisiting_length.length !==0){
+            $('.slideshow-block.grid-gallery').css('padding-bottom', '60px');
+            $('.slideshow-block.grid-gallery').css('padding-top', '60px');
+        }
         // wp.media.frames.file_frame.on('all', function(e) { console.log(e); });
         $(document).on('click', '.upload_image_button', function (e) {
             e.preventDefault();
@@ -120,6 +125,8 @@
                         var attachment = attachment.toJSON();
                         var image_url = attachment.url;
                         var image_id = attachment.id;
+                        $('.slideshow-block.grid-gallery').css('padding-bottom', '60px');
+                        $('.slideshow-block.grid-gallery').css('padding-top', '60px');
                         $('.slideshow-container .ui-sortable').append(`<div class="ui-state-default col-md-6 col-lg-4 item" data-id="${image_id}"><img class="img-fluid image scale-on-hover" src="${image_url}"> <span class="remove-image" href="#">&#215;</span></div>`);
                     }
                 })
@@ -151,6 +158,5 @@
             });
             $("#sortable").disableSelection();
         });
-
     });
 }(jQuery));

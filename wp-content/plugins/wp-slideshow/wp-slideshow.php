@@ -5,23 +5,37 @@ Description: A plugin that creates a shortcode to show images in a slideshow
 Author: Shkurte Azemi
 Version: 1.0.0
 */
+/**
+ *
+ * @package Wp_Slideshow
+ */
 
-use JetBrains\PhpStorm\NoReturn;
 
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class SlideshowSettings
 {
 
+
+    public $submenu;
+
     function __construct()
     {
+        $this->setup();
+
+//        print_r($this->submenu);
+
+    }
+
+    public function setup()
+    {
+
         //registered hooks and filters that are needed for the plugin
         add_action('admin_menu', array($this, 'adminPage'));
-        add_action('admin_init', array($this, 'settings'));;
-        add_action('admin_enqueue_scripts', array($this, 'pluginAssets'));
-        add_action('wp_enqueue_scripts', array($this, 'pluginLibs'));
+        add_action('admin_init', array($this, 'settings'));
+        add_action('admin_enqueue_scripts', array($this, 'adminAssets'));
+        add_action('wp_enqueue_scripts', array($this, 'frontendAssets'));
         add_action('init', array($this, 'slideshow_custom_shortcode'));
-        add_shortcode('myslideshow', array($this, 'myslideshow_callback'));
     }
 
     function slideshow_custom_shortcode()
@@ -51,49 +65,37 @@ class SlideshowSettings
         <button type="button" class="button button-primary upload_image_button"><?php _e('Select Images'); ?></button>
 
         <?php
-        $image_ids_string = get_option('slideshow_images_ids');
-        $image_ids = explode(",", $image_ids_string);
+        $images = $this->getSlideshowImages();
 
-        $images = [];
-        if (!empty($image_ids)) {
-            foreach ($image_ids as $image_id) {
-                $image = wp_get_attachment_image_src($image_id, 'medium');
-                $images[] =array(
-                    'id' => $image_id,
-                    'url' => $image[0]
-                ) ;
-            }
-        }
 
-        if (!empty($images)):
             ?>
             <div class="slideshow-block grid-gallery">
                 <div class="container slideshow-container">
-
                     <div id="sortable" class="row">
-                        <?php foreach ($images as $image):
-                     ?>
-                                <div class="ui-state-default col-md-6 col-lg-4 item" data-id="<?php echo $image['id']?>"><img
-                                            class="img-fluid image scale-on-hover"
-                                            src="<?php echo $image['url'] ?>">
-                                    <span class="remove-image" href="#">&#215;</span>
-                                </div>
-                            <?php endforeach; ?>
+                        <?php  if (!empty($images)): foreach ($images as $image):
+                            ?>
+                            <div class="ui-state-default col-md-6 col-lg-4 item" data-id="<?php echo $image['id'] ?>">
+                                <img
+                                        class="img-fluid image scale-on-hover"
+                                        src="<?php echo $image['url'] ?>">
+                                <span class="remove-image" href="#">&#215;</span>
+                            </div>
+                        <?php  endforeach;endif; ?>
                     </div>
                 </div>
             </div>
         <?php
-        endif;
+
     }
 
     //register admin page in the dashboard menu
-    function adminPage()
+    public function adminPage()
     {
         add_options_page('Slideshow Settings', 'Slideshow Settings', 'manage_options', 'slideshow-settings-page', array($this, 'ourHtml'));
     }
 
     //render settings fields HTML
-    function ourHtml()
+    public function ourHtml()
     {
         //check if current logged in user has administrator privileges
         if (!current_user_can('manage_options')) {
@@ -101,6 +103,7 @@ class SlideshowSettings
         }
 
         ?>
+
         <div class="wrap">
             <h1> <?php _e('Plugin Settings', 'slideshow-images') ?></h1>
             <div class="tab-content">
@@ -118,17 +121,34 @@ class SlideshowSettings
     }
 
 
-    function myslideshow_callback($atts)
+    function myslideshow_callback()
     {
-        $a = shortcode_atts(array(
-            'link' => '#',
-            'id' => 'salcodes',
-            'color' => 'blue',
-            'size' => '',
-            'label' => 'Button',
-            'target' => '_self'
-        ), $atts);
+        $images = $this->getSlideshowImages();
 
+        $output = '';
+        if (!empty($images)) {
+            $output .= "<div class='swiper-container slider'>
+                    <div class='swiper-wrapper'>";
+            foreach ($images as $image):
+
+                $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
+
+            endforeach;
+            $output .= "</div><div class='swiper-button-next'></div><div class='swiper-button-prev'></div></div>";
+
+            $output .= "<div class='swiper-container slider-thumbnail'><div class='swiper-wrapper'>";
+            foreach ($images as $image):
+
+                $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
+
+            endforeach;
+            $output .= "</div></div>";
+        }
+        return $output;
+    }
+
+    function getSlideshowImages()
+    {
         $image_ids_string = get_option('slideshow_images_ids');
         $image_ids = explode(",", $image_ids_string);
 
@@ -136,38 +156,21 @@ class SlideshowSettings
         if (!empty($image_ids)) {
             foreach ($image_ids as $image_id) {
                 $image = wp_get_attachment_image_src($image_id, 'medium');
-                $images[] =array(
-                    'id' => $image_id,
-                    'url' => $image[0]
-                ) ;
+                if ($image) {
+                    $images[] = array(
+                        'id' => $image_id,
+                        'url' => $image[0]
+                    );
+                }
+
             }
         }
 
-        $output = '';
-        if (!empty($images)) {
-            $output .= '<div class="swiper-container slider">
-                    <div class="swiper-wrapper">
-    <!-- Slides -->';
-            foreach ($images as  $image):
-
-                $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
-
-            endforeach;
-            $output .= '</div><div class="swiper-button-next"></div><div class="swiper-button-prev"></div></div>';
-
-            $output .= '<div class="swiper-container slider-thumbnail"><div class="swiper-wrapper">';
-            foreach ($images as  $image):
-
-                    $output .= "<div class='swiper-slide'><img src='${image['url']}' alt=''></div>";
-
-            endforeach;
-            $output .= '</div></div>';
-        }
-        return $output;
+        return $images;
     }
 
     //enqueue js scripts and styles
-    function pluginAssets()
+    function adminAssets()
     {
         wp_enqueue_style('main-css', plugin_dir_url(__FILE__) . 'assets/css/main.css');
         wp_enqueue_style('bootstrap-style', '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css');
@@ -177,7 +180,7 @@ class SlideshowSettings
 
     }
 
-    function pluginLibs()
+    function frontendAssets()
     {
         wp_enqueue_style('swiper-css', plugin_dir_url(__FILE__) . 'lib/swiper-bundle.min.css');
         wp_enqueue_style('main-css', plugin_dir_url(__FILE__) . 'assets/css/swiper.css');
